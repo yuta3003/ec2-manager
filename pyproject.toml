@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "ec2-manager"
+version = "0.1.0"
+description = ""
+authors = ["yuta3003 <y.nakazawa3003+github@gmail.com>"]
+readme = "README.md"
+packages = [{include = "ec2_manager"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+boto3 = "^1.28.35"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
