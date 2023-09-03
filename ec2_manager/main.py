@@ -30,3 +30,4 @@ for region in regions:
 
     if answer_dict:
         answer_list.append(answer_dict)
+print(answer_list)
