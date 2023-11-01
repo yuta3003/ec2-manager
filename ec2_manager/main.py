@@ -1,31 +1,41 @@
 import os
 
 import boto3
-
-with open("reagion.txt", "r", encoding="utf-8") as file:
-    regions = [line.strip() for line in file]
+import botocore.exceptions
 
 
-answer_list = []
-for region in regions:
-    answer_dict = {}
-    instances = []
-    ec2 = boto3.client(
-        "ec2",
-        region_name=region,
-    )
+def fetch_instances_status():
+    answer_list = []
 
-    ec2_data = ec2.describe_instances()
-    for ec2_reservation in ec2_data["Reservations"]:
-        for ec2_instance in ec2_reservation["Instances"]:
-            if ec2_instance["InstanceId"]:
-                instance = {}
-                instance["Status"] = ec2_instance["State"]["Name"]
-                instance["InstanceID"] = ec2_instance["InstanceId"]
-                instances.append(instance)
-                answer_dict["Region"] = region
-                answer_dict["Instances"] = instances
+    session = boto3.session.Session()
+    available_regions = session.get_available_regions('ec2')
 
-    if answer_dict:
-        answer_list.append(answer_dict)
-print(answer_list)
+    for region in available_regions:
+        try:
+            answer_dict = {}
+            instances = []
+            ec2 = boto3.client(
+                "ec2",
+                region_name=region,
+            )
+            ec2_data = ec2.describe_instances()
+            for ec2_reservation in ec2_data["Reservations"]:
+                for ec2_instance in ec2_reservation["Instances"]:
+                    if ec2_instance["InstanceId"]:
+                        instance = {}
+                        instance["Status"] = ec2_instance["State"]["Name"]
+                        instance["InstanceID"] = ec2_instance["InstanceId"]
+                        instances.append(instance)
+                        answer_dict["Region"] = region
+                        answer_dict["Instances"] = instances
+
+            if answer_dict:
+                answer_list.append(answer_dict)
+        except botocore.exceptions.ClientError as error:
+            print(f"{region}は有効になっていないリージョンです。スキップします。")
+
+    return answer_list
+
+if __name__ == "__main__":
+    instances_info = fetch_instances_status()
+    print(instances_info)
