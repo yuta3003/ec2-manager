@@ -1,7 +1,7 @@
 import os
 
 import boto3
-import botocore.exceptions
+from botocore.exceptions import ClientError
 
 
 def fetch_instances_status():
@@ -31,11 +31,26 @@ def fetch_instances_status():
 
             if answer_dict:
                 answer_list.append(answer_dict)
-        except botocore.exceptions.ClientError as error:
+        except ClientError as error:
             print(f"{region}は有効になっていないリージョンです。スキップします。")
 
     return answer_list
 
 if __name__ == "__main__":
-    instances_info = fetch_instances_status()
-    print(instances_info)
+
+    running_list = []
+    stopped_list = []
+
+    ec2_info = fetch_instances_status()
+    for region_ec2 in ec2_info:
+        for instances in region_ec2["Instances"]:
+            if instances["Status"] == "running":
+                running_list.append(instances)
+            elif instances["Status"] == "stopped":
+                stopped_list.append(instances)
+
+    print("----run--------")
+    print(running_list)
+    print("----stop-------")
+    print(stopped_list)
+
