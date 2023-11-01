@@ -12,8 +12,6 @@ for region in regions:
     instances = []
     ec2 = boto3.client(
         "ec2",
-        aws_access_key_id=os.environ["AccessKey"],
-        aws_secret_access_key=os.environ["SecretAccessKey"],
         region_name=region,
     )
 
